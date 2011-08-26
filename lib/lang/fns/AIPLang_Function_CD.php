@@ -17,7 +17,19 @@ class AIPLang_Function_CD extends AIPLang_Function {
 		if(substr($line[1], -1) === ';')
 			$line[1] = substr($line[1], 0, -1);
 			
-		if(!in_array(substr($line[1], 0, 1), array('$', '\'', '"')))
+		if(substr($line[1], 0, 5) === '$this') {
+			if(strlen($line[1]) === 5) {
+				$line[1] = '.';
+			}
+			else {
+				$line[1] = explode('->', $line[1], 2);
+				if(substr($line[1][1], -2) === '()')
+					$line[1][1] = substr($line[1][1], 0, -2);
+				$line[1] = "array('\$this', '{$line[1][1]}')";
+			}
+		}
+			
+		if(!in_array(substr($line[1], 0, 1), array('$', '\'', '"')) and substr($line[1], -1) !== ')')
 			$line[1] = "'{$line[1]}'";
 			
 		return '\AIP\lib\lang\fns\AIPLang_Function_CD::execute(' . $line[1] . ')';
@@ -54,6 +66,18 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	}
 	
 	protected function _cd_thing() {
+		$current_path = \AIP\lib\Evaluer::pathenize();
+		$current_reflection =
+			isset(\AIP\lib\Evaluer::$reflections[$current_path]) ? \AIP\lib\Evaluer::$reflections[$current_path] : false;
+		
+		if(is_array($this->thing)) {
+			if($this->thing[0] === '$this') {
+				if(!$current_reflection instanceof \ReflectionClass) die('CD::73'); // TODO : throw Exception
+				
+				$this->thing[0] = $current_reflection->name;
+			}
+		}
+		
 		$r = new \AIP\lib\Reflectionizer($this->thing);
 		
 		\AIP\lib\Evaluer::$path[] = $r->locationize();

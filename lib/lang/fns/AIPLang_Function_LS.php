@@ -49,7 +49,10 @@ class AIPLang_Function_LS extends AIPLang_Function {
 		}
 		
 		if($reflection instanceof \ReflectionClass)
-			$this->_ls_class_reflection($reflection);
+			return $this->_ls_class_reflection($reflection);
+			
+		if($reflection instanceof \ReflectionMethod)
+			return $this->_ls_method_reflection($reflection);
 	}
 	
 	protected function _ls_no_reflection() {
@@ -74,6 +77,49 @@ class AIPLang_Function_LS extends AIPLang_Function {
 		), $this->args));
 		
 		$return = '';
+		
+		if($show_constants) {
+			$return .= "Constants: \n";
+			
+			$constants = $reflection->getConstants();
+			
+			foreach($constants as $constant_name => $constant_value) {
+				if(is_string($constant_value))
+					$constant_value = "'{$constant_value}'";
+				
+				$return .= "\t- const {$constant_name} = {$constant_value};\n";
+			}
+		}
+		
+		if($show_properties) {
+			$return .= "Properties:\n";
+			
+			$type_map = array(
+				'public' => \ReflectionMethod::IS_PUBLIC,
+				'protected' => \ReflectionProperty::IS_PROTECTED,
+				'private' => \ReflectionProperty::IS_PRIVATE,
+				'static' => \ReflectionProperty::IS_STATIC
+			);
+			
+			$filter = array_sum($type_map);
+			foreach($type_map as $k => $v)
+				if(!in_array($k, $types))
+					$filter -= $type_map[$k];
+				
+			$properties = $reflection->getProperties($filter);
+
+			foreach($properties as $property) {
+				$return .= "\t- ";
+
+				if($property->isPublic()) $return .= 'public ';
+				elseif($property->isProtected()) $return .= 'protected ';
+				elseif($property->isPrivate()) $return .= 'private';
+
+				if($property->isStatic()) $return .= 'static ';
+
+				$return .= '$' . $property->name .  ";\n";
+			}
+		}
 		
 		if($show_methods) {
 			$return .= "Methods:\n";
@@ -111,36 +157,10 @@ class AIPLang_Function_LS extends AIPLang_Function {
 			}
 		}
 		
-		if($show_properties) {
-			$return .= "Properties:\n";
-			
-			$type_map = array(
-				'public' => \ReflectionMethod::IS_PUBLIC,
-				'protected' => \ReflectionProperty::IS_PROTECTED,
-				'private' => \ReflectionProperty::IS_PRIVATE,
-				'static' => \ReflectionProperty::IS_STATIC
-			);
-			
-			$filter = array_sum($type_map);
-			foreach($type_map as $k => $v)
-				if(!in_array($k, $types))
-					$filter -= $type_map[$k];
-				
-			$properties = $reflection->getProperties($filter);
-
-			foreach($properties as $property) {
-				$return .= "\t- ";
-
-				if($property->isPublic()) $return .= 'public ';
-				elseif($property->isProtected()) $return .= 'protected ';
-				elseif($property->isPrivate()) $return .= 'private';
-
-				if($property->isStatic()) $return .= 'static ';
-
-				$return .= '$' . $property->name .  ";\n";
-			}
-		}
-		
 		echo $return;
+	}
+	
+	protected function _ls_method_reflection(\ReflectionMethod $reflection) {
+		var_dump($reflection->__toString());
 	}
 }
