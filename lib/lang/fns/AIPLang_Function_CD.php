@@ -20,20 +20,13 @@ class AIPLang_Function_CD extends AIPLang_Function {
 		if(!in_array(substr($line[1], 0, 1), array('$', '\'', '"')))
 			$line[1] = "'{$line[1]}'";
 			
-		return "\AIP\lib\Evaluer::cd({$line[1]})";
+		return '\AIP\lib\lang\fns\AIPLang_Function_CD::execute(' . $line[1] . ')';
 	}
 	
 	public static function execute($thing) {
 		$fn = new self($thing);
 		
 		$fn->cd();
-		
-		$reflection = self::reflectionize($thing);
-		
-		self::$path[] = is_object($thing) ? get_class($thing) . '#[ID]' : $thing;
-		
-		self::$sandbox_vars[self::pathenize()] = array();
-		self::$reflections[self::pathenize()] = $reflection;
 	}
 	
 	public function __construct($thing) {
@@ -43,6 +36,8 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	public function cd() {
 		if($this->thing === '.') return $this->_cd_self();
 		elseif($this->thing === '..') return $this->_cd_parent();
+		
+		return $this->_cd_thing();
 	}
 	
 	protected function _cd_self() {
@@ -50,7 +45,7 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	}
 	
 	protected function _cd_parent() {
-		\AIP\lib\Evaluer::unreflectionize();
+		unset(\AIP\lib\Evaluer::$reflections[\AIP\lib\Evaluer::pathenize()]);
 		\AIP\lib\Evaluer::sandbox_vars(array(), false);
 		
 		array_pop(\AIP\lib\Evaluer::$path);
@@ -59,8 +54,12 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	}
 	
 	protected function _cd_thing() {
-		\AIP\lib\Evaluer::reflectionize($this->thing);
-		\AIP\lib\Evaluer::$path[] = is_object($this->thing) ? get_class($this->thing) . '*' : $thing;
+		$r = new \AIP\lib\Reflectionizer($this->thing);
+		
+		\AIP\lib\Evaluer::$path[] = $r->locationize();
+		\AIP\lib\Evaluer::$reflections[\AIP\lib\Evaluer::pathenize()] = $r->reflectionize();
 		\AIP\lib\Evaluer::sandbox_vars(array(), false);
+		
+		return true;
 	}
 }
