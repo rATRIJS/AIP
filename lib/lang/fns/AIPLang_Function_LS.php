@@ -32,13 +32,16 @@ class AIPLang_Function_LS extends AIPLang_Function {
 	}
 	
 	public function __construct($target, $args) {
+		\AIP\lib\Evaluer::init_storage('reflections', array());
+		
 		$this->target = $target;
 		$this->args = $args;
 	}
 	
 	public function ls() {
 		$path = \AIP\lib\Evaluer::pathenize();
-		$reflection = isset(\AIP\lib\Evaluer::$reflections[$path]) ? \AIP\lib\Evaluer::$reflections[$path] : false;
+		$reflection =
+			isset(\AIP\lib\Evaluer::$storage['reflections'][$path]) ? \AIP\lib\Evaluer::$storage['reflections'][$path] : false;
 		
 		if($this->target === '.' and false === $reflection)
 			return $this->_ls_no_reflection();
@@ -113,7 +116,7 @@ class AIPLang_Function_LS extends AIPLang_Function {
 
 				if($property->isPublic()) $return .= 'public ';
 				elseif($property->isProtected()) $return .= 'protected ';
-				elseif($property->isPrivate()) $return .= 'private';
+				elseif($property->isPrivate()) $return .= 'private ';
 
 				if($property->isStatic()) $return .= 'static ';
 
@@ -145,7 +148,7 @@ class AIPLang_Function_LS extends AIPLang_Function {
 				
 				if($method->isPublic()) $return .= 'public ';
 				elseif($method->isProtected()) $return .= 'protected ';
-				elseif($method->isPrivate()) $return .= 'private';
+				elseif($method->isPrivate()) $return .= 'private ';
 				
 				if($method->isAbstract()) $return .= 'abstract ';
 				elseif($method->isFinal()) $return .= 'final ';
@@ -162,5 +165,6 @@ class AIPLang_Function_LS extends AIPLang_Function {
 	
 	protected function _ls_method_reflection(\ReflectionMethod $reflection) {
 		var_dump($reflection->__toString());
+		var_dump($reflection->getParameters());
 	}
 }

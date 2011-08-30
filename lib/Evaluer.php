@@ -3,7 +3,7 @@ namespace AIP\lib;
 
 class Evaluer {
 	public static $path = array();
-	public static $reflections = array();
+	public static $storage = array();
 	
 	protected static $sandbox_vars = array();
 	
@@ -32,6 +32,11 @@ class Evaluer {
 			self::$sandbox_vars[$path] = $merge ? array_merge(self::$sandbox_vars[$path], $vars) : $vars;
 			
 		return self::$sandbox_vars[$path];
+	}
+	
+	public static function init_storage($key, $value) {
+		if(!isset(self::$storage[$key]))
+			self::$storage[$key] = $value;
 	}
 	
 	public static function pathenize() {

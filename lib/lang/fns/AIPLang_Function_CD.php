@@ -28,9 +28,8 @@ class AIPLang_Function_CD extends AIPLang_Function {
 				$line[1] = "array('\$this', '{$line[1][1]}')";
 			}
 		}
-			
-		if(!in_array(substr($line[1], 0, 1), array('$', '\'', '"')) and substr($line[1], -1) !== ')')
-			$line[1] = "'{$line[1]}'";
+		
+		$line[1] = self::quotenize($line[1]);
 			
 		return '\AIP\lib\lang\fns\AIPLang_Function_CD::execute(' . $line[1] . ')';
 	}
@@ -42,6 +41,9 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	}
 	
 	public function __construct($thing) {
+		\AIP\lib\Evaluer::init_storage('reflections', array());
+		\AIP\lib\Evaluer::init_storage('instances', array());
+		
 		$this->thing = $thing;
 	}
 	
@@ -57,7 +59,8 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	}
 	
 	protected function _cd_parent() {
-		unset(\AIP\lib\Evaluer::$reflections[\AIP\lib\Evaluer::pathenize()]);
+		unset(\AIP\lib\Evaluer::$storage['reflections'][\AIP\lib\Evaluer::pathenize()]);
+		unset(\AIP\lib\Evaluer::$storage['instances'][\AIP\lib\Evaluer::pathenize()]);
 		\AIP\lib\Evaluer::sandbox_vars(array(), false);
 		
 		array_pop(\AIP\lib\Evaluer::$path);
@@ -67,8 +70,8 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	
 	protected function _cd_thing() {
 		$current_path = \AIP\lib\Evaluer::pathenize();
-		$current_reflection =
-			isset(\AIP\lib\Evaluer::$reflections[$current_path]) ? \AIP\lib\Evaluer::$reflections[$current_path] : false;
+		$current_reflection = isset(\AIP\lib\Evaluer::$storage['reflections'][$current_path]) ?
+			\AIP\lib\Evaluer::$storage['reflections'][$current_path] : false;
 		
 		if(is_array($this->thing)) {
 			if($this->thing[0] === '$this') {
@@ -81,8 +84,11 @@ class AIPLang_Function_CD extends AIPLang_Function {
 		$r = new \AIP\lib\Reflectionizer($this->thing);
 		
 		\AIP\lib\Evaluer::$path[] = $r->locationize();
-		\AIP\lib\Evaluer::$reflections[\AIP\lib\Evaluer::pathenize()] = $r->reflectionize();
+		\AIP\lib\Evaluer::$storage['reflections'][\AIP\lib\Evaluer::pathenize()] = $r->reflectionize();
 		\AIP\lib\Evaluer::sandbox_vars(array(), false);
+		
+		if(is_object($this->thing))
+			\AIP\lib\Evaluer::$storage['instances'][\AIP\lib\Evaluer::pathenize()] = $this->thing;
 		
 		return true;
 	}
