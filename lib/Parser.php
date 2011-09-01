@@ -5,11 +5,9 @@ class Parser {
 	protected $statement;
 	protected $aip_lang_constructs;
 	
-	public function __construct() {
-		$config = require _AIP_PATH . '/config.php';
-		
+	public function __construct() {		
 		$this->statement = new Statement;
-		$this->aip_lang_constructs = isset($config['aip_lang_constructs']) ? $config['aip_lang_constructs'] : array();
+		$this->aip_lang_constructs = Config::get(Config::OPTION_AIP_LANG_CONSTRUCTS);
 	}
 	
 	public function parse($line) {

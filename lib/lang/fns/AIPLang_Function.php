@@ -73,7 +73,7 @@ abstract class AIPLang_Function extends \AIP\lib\lang\AIPLang_Construct {
 			$current++;
 		}
 		
-		$value = trim(substr($line, $current));
+		$value = $current === $start ? '' : trim(substr($line, $current));
 		
 		if(empty($value))
 			throw new \AIP\excptns\lib\lang\fns\AIPLang_Function_NotValidSetterException("Given prefix isn't valid setter.");

@@ -12,18 +12,10 @@ class AIPLang_Function_LS extends AIPLang_Function {
 	public static function parse($line) {
 		$line = explode(' ', $line, 2);
 		
-		if(!isset($line[1]))
-			$line[1] = '.';
-			
-		$args = explode(' ', $line[1]);
-		$target = '.';
-		if(substr($args[count($args) - 1], 0, 1) !== '-')
-			$target = array_pop($args);
-			
-		if(!in_array(substr($target, 0, 1), array('\'', '"', '$')))
-			$target = "'{$target}'";
+		if(!isset($line[1])) $line[1] = "'.'";
+		else $line[1] = \AIP\lib\Reflectionizer::parse_statement($line[1]);
 		
-		return '\AIP\lib\lang\fns\AIPLang_Function_LS::execute(' . $target . ')';
+		return '\AIP\lib\lang\fns\AIPLang_Function_LS::execute(' . $line[1] . ')';
 	}
 	
 	public static function execute($target, $args = array()) {
@@ -39,17 +31,12 @@ class AIPLang_Function_LS extends AIPLang_Function {
 	}
 	
 	public function ls() {
-		$path = \AIP\lib\Evaluer::pathenize();
-		$reflection =
-			isset(\AIP\lib\Evaluer::$storage['reflections'][$path]) ? \AIP\lib\Evaluer::$storage['reflections'][$path] : false;
+		$current_reflection = self::get_current_reflection();
 		
-		if($this->target === '.' and false === $reflection)
+		if($this->target === '.' and false === $current_reflection)
 			return $this->_ls_no_reflection();
 			
-		if($this->target !== '.') {
-			$reflection = new \AIP\lib\Reflectionizer($this->target);
-			$reflection = $reflection->reflectionize();
-		}
+		$reflection = '.' === $this->target ? $current_reflection : self::reflection_target_to_reflection($this->target);
 		
 		if($reflection instanceof \ReflectionClass)
 			return $this->_ls_class_reflection($reflection);
@@ -75,7 +62,8 @@ class AIPLang_Function_LS extends AIPLang_Function {
 				'private',
 				'final',
 				'static',
-				'abstract'
+				'abstract',
+				'inherited'
 			)
 		), $this->args));
 		
@@ -144,6 +132,11 @@ class AIPLang_Function_LS extends AIPLang_Function {
 			$methods = $reflection->getMethods($filter);
 			
 			foreach($methods as $method) {
+				$declared_class = $method->getDeclaringClass();
+				
+				$is_inherited = $reflection->getName() !== $declared_class->getName();
+				if($is_inherited and !in_array('inherited', $types)) continue;
+				
 				$return .= "\t- ";
 				
 				if($method->isPublic()) $return .= 'public ';
@@ -156,6 +149,7 @@ class AIPLang_Function_LS extends AIPLang_Function {
 				if($method->isStatic()) $return .= 'static ';
 				
 				$return .= 'function ';
+				if($is_inherited) $return .= $declared_class->getName() . '::';
 				$return .= $method->name . "();\n";
 			}
 		}
@@ -164,7 +158,33 @@ class AIPLang_Function_LS extends AIPLang_Function {
 	}
 	
 	protected function _ls_method_reflection(\ReflectionMethod $reflection) {
-		var_dump($reflection->__toString());
-		var_dump($reflection->getParameters());
+		extract($this->merge_args(array(
+			'types' => array(
+				'optional',
+				'required',
+				'by_reference'
+			)
+		), $this->args));
+		
+		$parameters = $reflection->getParameters();
+		
+		$return = "Arguments:\n";
+		foreach($parameters as $parameter) {
+			$is_optional = $parameter->isOptional();
+			$is_required = !$is_optional;
+			$is_passed_by_reference = $parameter->isPassedByReference();
+			
+			if($is_optional and !in_array('optional', $types)) continue;
+			if($is_required and !in_array('required', $types)) continue;
+			if($is_passed_by_reference and !in_array('by_reference', $types)) continue;
+			
+			$return .= "\t- ";
+			if($is_passed_by_reference) $return .= '&';
+			$return .= '$' . $parameter->getName() . ' ';
+			if($is_optional) $return .= '= ' . str_replace("\n", '', var_export($parameter->getDefaultValue(), true));
+			$return .= "\n";
+		}
+		
+		echo $return;
 	}
 }
