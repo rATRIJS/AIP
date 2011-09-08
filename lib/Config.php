@@ -10,6 +10,7 @@ class Config {
 	
 	const OPTION_AIP_LANG_CONSTRUCTS = 'aip_lang_constructs';
 	const OPTION_BEFORE_LOOP_EXEC = 'before_loop_exec';
+	const OPTION_BEFORE_REPL_INCLUDE = 'before_repl_include';
 	
 	protected static $i;
 	
@@ -59,8 +60,19 @@ class Config {
 		if(!is_array($this->_config))
 			throw new E\AIPConfig_FileException('Configuration file must return an array.');
 		
+		$this->_init_before_repl_include();
 		$this->_init_before_loop_exec();
 		$this->_init_aip_lang_constructs();
+	}
+	
+	protected function _init_before_repl_include() {
+		$k = self::OPTION_BEFORE_REPL_INCLUDE;
+		
+		if(empty($this->_config[$k]))
+			$this->_config[$k] = false;
+		
+		if(false !== $this->_config[$k] and !file_exists($this->_config[$k]))
+			throw new E\AIPConfig_OptionException("Option '{$k}' must link to an existing file or be false.");
 	}
 	
 	protected function _init_before_loop_exec() {

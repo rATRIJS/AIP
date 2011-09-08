@@ -23,9 +23,11 @@ class Parser {
 			
 		if($starts_block) $this->statement->increase_block_level();
 		if($ends_block) $this->statement->decrease_block_level();
-		$this->statement
-			->append($line)
-			->interrupted($this->interrupts($line));
+		
+		$this->statement->interrupted($this->interrupts($line));
+		if($this->statement->interrupted()) $line = $this->aip_die();
+		
+		$this->statement->append($line);
 			
 		$statement = clone $this->statement;
 		
@@ -67,6 +69,10 @@ class Parser {
 		);
 		
 		return in_array($line, $valid_interrupts);
+	}
+	
+	protected function aip_die() {
+		return '';
 	}
 	
 	protected function sanitize($line) {
