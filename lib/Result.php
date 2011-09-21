@@ -6,9 +6,19 @@ class Result {
 	public $output;
 	public $message;
 	public $php;
-	public $path;
+	public $internal;
+	
+	public static function __callStatic($name, $args) {
+		if(property_exists(__CLASS__, $name) and isset($args[0]))
+			return new self(array($name => $args[0]));
+			
+		throw new \AIP\excptns\InvalidMethodException("'{$name}' isn't a valid method for " . __CLASS__ . " class");
+	}
 	
 	public function __construct($args = array()) {
+		if(!array_key_exists('return', $args))
+			$args['return'] = new hlprs\NotReturnable;
+		
 		foreach($args as $k => $v)
 			if(property_exists($this, $k))
 				$this->{$k} = $v;
@@ -17,10 +27,18 @@ class Result {
 	public function render() {
 		$render = array();
 		
-		$this->prepare_php($render);
-		$this->prepare_return($render);
-		$this->prepare_output($render);
-		$this->prepare_message($render);
+		if(Config::get(Config::OPTION_VERBOSITY) > 0)
+			$this->prepare_php($render);
+		
+		$internal = $this->prepare_internal();
+		if(!isset($internal)) {
+			$this->prepare_return($render);
+			$this->prepare_output($render);
+			$this->prepare_message($render);
+		}
+		else {
+			$render[] = $internal;
+		}
 			
 		return $this->prepare_render($render);
 	}
@@ -35,7 +53,7 @@ class Result {
 		$php = trim($this->php);
 		if(empty($php)) return;
 		
-		$php = Formatter::load('# PHP:')->bold() . "\n" . $php;
+		$php = Formatter::load('# PHP')->bold() . "\n" . $php;
 		
 		if(isset($render)) $render[] = $php;
 		
@@ -43,6 +61,8 @@ class Result {
 	}
 	
 	public function prepare_return(&$render = null) {
+		if($this->return instanceof hlprs\NotReturnable) return;
+		
 		$return = null;
 		if(is_scalar($this->return) or is_null($this->return)) {
 			ob_start();
@@ -82,5 +102,19 @@ class Result {
 		if(isset($render)) $render[] = $message;
 		
 		return $message;
+	}
+	
+	public function prepare_internal(&$render = null) {
+		if(!is_array($this->internal)) return;
+		
+		$title = trim($this->internal['title']);
+		$body = trim($this->internal['body']);
+		if(empty($body) or empty($title)) return;
+		
+		$internal = Formatter::load("# {$title}")->bold() . "\n" . $body;
+		
+		if(isset($render)) $render[] = $internal;
+		
+		return $internal;
 	}
 }

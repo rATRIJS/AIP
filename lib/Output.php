@@ -3,6 +3,10 @@ namespace AIP\lib;
 
 class Output {
 	public static function write(Result $result) {
-		echo $result->render() . "\n";
+		self::raw_write($result->render());
+	}
+	
+	public static function raw_write($s) {
+		echo $s . "\n";
 	}
 }

@@ -4,11 +4,11 @@ namespace AIP\lib\lang\fns;
 class AIPLang_Function_SHOW_SOURCE extends AIPLang_Function {
 	protected $target;
 	
-	public static function parsable($line) {
+	public static function parsable($line, $statement) {
 		return (substr($line, 0, 11) === 'show-source' and (strlen($line) === 11 or substr($line, 11, 1) === ' '));
 	}
 	
-	public static function parse($line) {
+	public static function parse($line, $statement) {
 		$line = explode(' ', $line);
 		
 		if(!isset($line[1])) $line[1] = "'.'";
@@ -19,7 +19,9 @@ class AIPLang_Function_SHOW_SOURCE extends AIPLang_Function {
 	
 	public static function execute($target) {
 		$fn = new self($target);
-		return $fn->show_source();
+		$fn->show_source();
+		
+		return \AIP\lib\hlprs\NotReturnable::i();
 	}
 	
 	public function __construct($target) {
@@ -35,9 +37,35 @@ class AIPLang_Function_SHOW_SOURCE extends AIPLang_Function {
 		if($this->target === '.') $reflection = $current_reflection;
 		else $reflection = self::reflection_target_to_reflection($this->target);
 		
-		if(!$reflection instanceof \Reflector) { echo 'SHOWSOURCE::46'; return; };
+		$this->_make_internal_message($reflection);
 		
 		echo $this->_extract_php($reflection->getFileName(), $reflection->getStartLine(), $reflection->getEndLine());
+	}
+	
+	protected function _make_internal_message(\Reflector $reflection) {
+		$type = false;
+		$name = false;
+		$location = false;
+		
+		if($reflection instanceof \ReflectionFunction) {
+			$type = 'function';
+			$name = $reflection->name;
+		}
+		elseif($reflection instanceof \ReflectionClass) {
+			$type = 'class';
+			$name = $reflection->name;
+		}
+		elseif($reflection instanceof \ReflectionMethod) {
+			$type = 'method';
+			$name = $reflection->getDeclaringClass()->name . '::' . $reflection->name;
+		}
+		
+		$location = $reflection->getFileName() . ':' . $reflection->getStartLine();
+		
+		\AIP\lib\Evaluer::make_internal_from(
+			\AIP\lib\Evaluer::SOURCE_OUTPUT,
+			sprintf("Source Code for %s '%s' (%s)", $type, $name, $location)
+		);
 	}
 	
 	protected function _extract_php($file, $start, $end) {

@@ -2,8 +2,8 @@
 namespace AIP\lib\lang;
 
 abstract class AIPLang_Construct {
-	abstract public static function parsable($line);
-	abstract public static function parse($line);
+	abstract public static function parsable($line, $statement);
+	abstract public static function parse($line, $statement);
 	
 	protected static function get_current_reflection() {
 		$current_path = static::get_current_path();

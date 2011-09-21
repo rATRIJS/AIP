@@ -5,7 +5,7 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 	protected $thing;
 	protected $args;
 	
-	public static function parsable($line) {
+	public static function parsable($line, $statement) {
 		if(strpos($line, '$this->') === false) return false;
 		
 		if(!isset(\AIP\lib\Evaluer::$storage['instances']) or !isset(\AIP\lib\Evaluer::$storage['reflections']))
@@ -22,7 +22,7 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 		return $reflection instanceof \ReflectionClass and is_object($instance);
 	}
 	
-	public static function parse($line) {
+	public static function parse($line, $statement) {
 		$name = self::extract_name($line, '$this->');
 		try {
 			$function = self::extract_function($line, $name);

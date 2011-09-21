@@ -11,6 +11,7 @@ class Config {
 	const OPTION_AIP_LANG_CONSTRUCTS = 'aip_lang_constructs';
 	const OPTION_BEFORE_LOOP_EXEC = 'before_loop_exec';
 	const OPTION_BEFORE_REPL_INCLUDE = 'before_repl_include';
+	const OPTION_VERBOSITY = 'verbosity';
 	
 	protected static $i;
 	
@@ -25,6 +26,10 @@ class Config {
 	
 	public static function get($key) {
 		return self::i()->get_option($key);
+	}
+	
+	public static function set($key, $value) {
+		return self::i()->set_option($key, $value);
 	}
 	
 	protected function __construct() {
@@ -56,6 +61,12 @@ class Config {
 		return $this->_config[$key];
 	}
 	
+	protected function set_option($key, $value) {
+		$this->_config[$key] = $value;
+		
+		return $this;
+	}
+	
 	protected function _validate() {
 		if(!is_array($this->_config))
 			throw new E\AIPConfig_FileException('Configuration file must return an array.');
@@ -63,6 +74,16 @@ class Config {
 		$this->_init_before_repl_include();
 		$this->_init_before_loop_exec();
 		$this->_init_aip_lang_constructs();
+		$this->_init_verbosity();
+	}
+	
+	protected function _init_verbosity() {
+		$k = self::OPTION_VERBOSITY;
+		
+		if(empty($this->_config[$k]))
+			$this->_config[$k] = 0;
+		
+		$this->_config[$k] = (int) $this->_config[$k];
 	}
 	
 	protected function _init_before_repl_include() {
@@ -93,7 +114,8 @@ class Config {
 				'\AIP\lib\lang\fns\AIPLang_Function_CD',
 				'\AIP\lib\lang\fns\AIPLang_Function_LS',
 				'\AIP\lib\lang\fns\AIPLang_Function_SHOW_SOURCE',
-				'\AIP\lib\lang\fns\AIPLang_Function_THIS'
+				'\AIP\lib\lang\fns\AIPLang_Function_THIS',
+				'\AIP\lib\lang\fns\AIPLang_Function_AUTO_RETURNER'
 			)
 		);
 	}

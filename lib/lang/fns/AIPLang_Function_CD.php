@@ -4,11 +4,11 @@ namespace AIP\lib\lang\fns;
 class AIPLang_Function_CD extends AIPLang_Function {
 	protected $thing;
 	
-	public static function parsable($line) {
+	public static function parsable($line, $statement) {
 		return substr($line, 0, 2) == 'cd' and (strlen($line) === 2 or substr($line, 0, 3) === 'cd ');
 	}
 	
-	public static function parse($line) {
+	public static function parse($line, $statement) {
 		$line = explode(' ', $line, 2);
 		
 		if(!isset($line[1]))
@@ -36,8 +36,9 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	
 	public static function execute($thing) {
 		$fn = new self($thing);
-		
 		$fn->cd();
+		
+		return \AIP\lib\hlprs\NotReturnable::i();
 	}
 	
 	public function __construct($thing) {

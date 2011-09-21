@@ -16,13 +16,13 @@ class Parser {
 		$starts_block = $this->starts_block($line);
 		$ends_block = $this->ends_block($line);
 		
+		if($starts_block) $this->statement->increase_block_level();
+		if($ends_block) $this->statement->decrease_block_level();
+		
 		$line = $this->aip_to_php($line);
 		
 		if(!$starts_block and !$ends_block)
 			$line = $this->semicolonize($line);
-			
-		if($starts_block) $this->statement->increase_block_level();
-		if($ends_block) $this->statement->decrease_block_level();
 		
 		$this->statement->interrupted($this->interrupts($line));
 		if($this->statement->interrupted()) $line = $this->aip_die();
@@ -47,8 +47,8 @@ class Parser {
 	
 	protected function aip_to_php($line) {
 		foreach($this->aip_lang_constructs as $construct)
-			if($construct::parsable($line))
-				$line = $construct::parse($line);
+			if($construct::parsable($line, $this->statement))
+				$line = $construct::parse($line, $this->statement);
 		
 		return $line;
 	}

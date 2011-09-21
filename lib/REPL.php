@@ -37,7 +37,15 @@ class REPL {
 	protected function run_before_loop_exec() {
 		$exec = Config::get(Config::OPTION_BEFORE_LOOP_EXEC);
 		
+		ob_start();
 		foreach($exec as $line)
 			$this->tick($line);
+		$output = ob_get_clean();
+		
+		if(Config::get(Config::OPTION_VERBOSITY) > 0) {
+			Output::write(Result::message("Start of 'before_loop_exec'"));
+			Output::raw_write($output);
+			Output::write(Result::message("End of 'before_loop_exec'"));
+		}
 	}
 }

@@ -1,17 +1,24 @@
 <?php
 namespace AIP\lib;
 
+use \AIP\excptns\lib as E;
+
 class Evaluer {
+	const SOURCE_RETURN = 'return';
+	const SOURCE_OUTPUT = 'output';
+	
 	public static $path = array();
 	public static $storage = array();
 	
 	protected static $sandbox_vars = array();
+	protected static $internalize_result = false;
 	
 	public static function execute(Statement $statement) {
 		$result = new Result;
 		
 		if($statement->in_block()) {
 			$result->message = 'Not yet finished';
+			$result->return = hlprs\NotReturnable::i();
 			
 			return $result;
 		}
@@ -22,7 +29,23 @@ class Evaluer {
 		$result->return = self::sandboxed_eval($result->php);
 		$result->output = ob_get_clean();
 		
+		if(self::$internalize_result !== false) {
+			$result->internal = array(
+				'title' => self::$internalize_result['title'],
+				'body' => self::$internalize_result['source'] === self::SOURCE_RETURN ? $result->return : $result->output
+			);
+		}
+			
+		self::make_internal_from(false);
+		
 		return $result;
+	}
+	
+	public static function make_internal_from($source = false, $title = false) {
+		if($source !== false)
+			self::_validate_source($source);
+		
+		self::$internalize_result = $source === false ? false : compact('source', 'title');
 	}
 	
 	public static function sandbox_vars($vars = null, $merge = true) {
@@ -59,5 +82,10 @@ class Evaluer {
 		);
 		
 		return $__aip_return;
+	}
+	
+	protected static function _validate_source($source) {
+		if(!in_array($source, array(self::SOURCE_RETURN, self::SOURCE_OUTPUT)))
+			throw new E\AIPEvaluer_InvalidSourceException("Given source `{$source}` isn't valid.");
 	}
 }
