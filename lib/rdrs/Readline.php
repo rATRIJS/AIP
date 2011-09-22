@@ -5,7 +5,7 @@ class Readline extends Reader {
 	protected $_last_input;
 	
 	public static function supported() {
-		return true;
+		return function_exists('readline');
 	}
 	
 	public function __construct() {}

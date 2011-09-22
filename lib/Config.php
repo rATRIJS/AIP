@@ -85,7 +85,8 @@ class Config {
 			self::MODE_MERGE,
 			'constructs',
 			array(
-				'\AIP\lib\rdrs\Readline'
+				'\\AIP\\lib\\rdrs\\Readline',
+				'\\AIP\\lib\\rdrs\\SimpleSTDIN'
 			)
 		);
 	}
