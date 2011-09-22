@@ -12,6 +12,7 @@ class Evaluer {
 	
 	protected static $sandbox_vars = array();
 	protected static $internalize_result = false;
+	protected static $last_was_unfinished = false;
 	
 	public static function execute(Statement $statement) {
 		$result = new Result;
@@ -20,10 +21,21 @@ class Evaluer {
 			$result->message = 'Not yet finished';
 			$result->return = hlprs\NotReturnable::i();
 			
+			self::$last_was_unfinished = true;
+			
 			return $result;
 		}
 		
 		$result->php = $statement->to_php();
+		
+		if(self::$last_was_unfinished) {
+			self::$last_was_unfinished = false;
+			
+			Input::confirm($result->php);
+		}
+		else {
+			Input::confirm();
+		}
 		
 		ob_start();
 		$result->return = self::sandboxed_eval($result->php);

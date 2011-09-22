@@ -13,6 +13,7 @@ class Config {
 	const OPTION_BEFORE_REPL_INCLUDE = 'before_repl_include';
 	const OPTION_VERBOSITY = 'verbosity';
 	const OPTION_INPUT_READERS = 'input_readers';
+	const OPTION_HISTORY_SIZE = 'history_size';
 	
 	protected static $i;
 	
@@ -77,6 +78,16 @@ class Config {
 		$this->_init_aip_lang_constructs();
 		$this->_init_verbosity();
 		$this->_init_input_readers();
+		$this->_init_history_size();
+	}
+	
+	protected function _init_history_size() {
+		$k = self::OPTION_HISTORY_SIZE;
+		
+		if(empty($this->_config[$k]))
+			$this->_config[$k] = 1000;
+			
+		$this->_config[$k] = (int) $this->_config[$k];
 	}
 	
 	protected function _init_input_readers() {

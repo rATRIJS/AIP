@@ -11,9 +11,10 @@ class Readline extends Reader {
 	public function __construct() {}
 	
 	public function read($path) {
-		$line = readline($this->_get_input_question($path));
+		if(\AIP\lib\Input::i()->is_history_confirmed())
+			$this->_historize(\AIP\lib\Input::history());
 		
-		$this->_historize($line);
+		$line = readline($this->_get_input_question($path));
 		
 		return $line;
 	}
