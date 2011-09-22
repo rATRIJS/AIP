@@ -1,21 +1,40 @@
 <?php
 namespace AIP\lib;
 
+use AIP\excptns\lib\input as E;
+
 class Input {
-	protected static $last_input;
+	protected static $i;
 	
-	public static function read($path = '/') {
-		$line = readline("{$path}$: ");
-		
-		self::historize($line);
-		
-		return $line;
+	protected $_reader;
+	
+	public static function i() {
+		if(!isset(self::$i))
+			self::$i = new self;
+
+		return self::$i;
 	}
 	
-	protected static function historize($line) {
-		if(self::$last_input !== $line)
-			readline_add_history($line);
-			
-		self::$last_input = $line;
+	public static function read($path = '/') {
+		return self::i()->read_line($path);
+	}
+	
+	protected function __construct() {
+		$readers = Config::get(Config::OPTION_INPUT_READERS);
+		
+		foreach($readers as $reader) {			
+			if(!in_array('AIP\\lib\\rdrs\\Reader', class_parents($reader)))
+				throw new E\AIPInput_InvalidReaderException("'{$reader}' must extend the \\AIP\\lib\\rdrs\\Reader class.");
+				
+			if($reader::supported()) {
+				$this->_reader = new $reader;
+				
+				break;
+			}
+		}
+	}
+	
+	public function read_line($path = '/') {
+		return $this->_reader->read($path);
 	}
 }

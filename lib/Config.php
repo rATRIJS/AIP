@@ -12,6 +12,7 @@ class Config {
 	const OPTION_BEFORE_LOOP_EXEC = 'before_loop_exec';
 	const OPTION_BEFORE_REPL_INCLUDE = 'before_repl_include';
 	const OPTION_VERBOSITY = 'verbosity';
+	const OPTION_INPUT_READERS = 'input_readers';
 	
 	protected static $i;
 	
@@ -75,6 +76,18 @@ class Config {
 		$this->_init_before_loop_exec();
 		$this->_init_aip_lang_constructs();
 		$this->_init_verbosity();
+		$this->_init_input_readers();
+	}
+	
+	protected function _init_input_readers() {
+		$this->_defaultize_array_option(
+			self::OPTION_INPUT_READERS,
+			self::MODE_MERGE,
+			'constructs',
+			array(
+				'\AIP\lib\rdrs\Readline'
+			)
+		);
 	}
 	
 	protected function _init_verbosity() {
