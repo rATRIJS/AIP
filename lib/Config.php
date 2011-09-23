@@ -94,7 +94,7 @@ class Config {
 		$this->_defaultize_array_option(
 			self::OPTION_INPUT_READERS,
 			self::MODE_MERGE,
-			'constructs',
+			'readers',
 			array(
 				'\\AIP\\lib\\rdrs\\Readline',
 				'\\AIP\\lib\\rdrs\\SimpleSTDIN'
@@ -136,6 +136,7 @@ class Config {
 			self::MODE_MERGE,
 			'constructs',
 			array(
+				'\AIP\lib\lang\fns\AIPLang_Function_HISTORY',
 				'\AIP\lib\lang\fns\AIPLang_Function_CD',
 				'\AIP\lib\lang\fns\AIPLang_Function_LS',
 				'\AIP\lib\lang\fns\AIPLang_Function_SHOW_SOURCE',

@@ -31,6 +31,10 @@ class Input {
 		return self::i()->get_history($length, $start);
 	}
 	
+	public static function history_id($id) {
+		return self::i()->get_history_by_id($id);
+	}
+	
 	protected function __construct() {
 		$this->_setup_reader();
 		
@@ -52,7 +56,7 @@ class Input {
 		$start -= 1;
 		
 		if(($start + $length) > $this->_max_history_size)
-			throw new E\AIPInput_HistorySizeException("Length too big. Maximum size is: {$this->_max_history_size}.");
+			throw new E\AIPInput_HistorySizeException("Requested history is off bounds. Maximum size is: {$this->_max_history_size}.");
 		
 		$current = $this->_last_history_index;
 		for($start; $start !== 0; $start--)
@@ -62,13 +66,22 @@ class Input {
 		for($i = $length; $i !== 0; $i--) {
 			if(!isset($this->_history[$current])) break;
 			
-			$history[] = $this->_history[$current--];
+			$history[$current] = $this->_history[$current];
+			
+			$current--;
 		}
 		
 		if($length === 1)
-			$history = isset($history[0]) ? $history[0] : false;
+			$history = count($history) > 0 ? array_pop($history) : false;
 		
 		return $history;
+	}
+	
+	public function get_history_by_id($id) {
+		if(!isset($this->_history[$id]))
+			throw new E\AIPInput_InvalidHistoryIDException("Requested history ID #{$id} doesn't exist.");
+		
+		return $this->_history[$id];
 	}
 	
 	public function confirm_history($override = false) {

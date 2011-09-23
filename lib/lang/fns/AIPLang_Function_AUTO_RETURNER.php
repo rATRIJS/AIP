@@ -10,7 +10,10 @@ class AIPLang_Function_AUTO_RETURNER extends AIPLang_Function {
 		'return',
 		'echo',
 		'print',
-		'}'
+		'}',
+		'try',
+		'function',
+		'class'
 	);
 	
 	public static function parsable($line, $statement) {
