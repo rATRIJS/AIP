@@ -71,9 +71,6 @@ class Input {
 			$current--;
 		}
 		
-		if($length === 1)
-			$history = count($history) > 0 ? array_pop($history) : false;
-		
 		return $history;
 	}
 	

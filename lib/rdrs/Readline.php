@@ -12,7 +12,7 @@ class Readline extends Reader {
 	
 	public function read($path) {
 		if(\AIP\lib\Input::i()->is_history_confirmed())
-			$this->_historize(\AIP\lib\Input::history());
+			$this->_historize(array_pop(\AIP\lib\Input::history()));
 		
 		$line = readline($this->_get_input_question($path));
 		
