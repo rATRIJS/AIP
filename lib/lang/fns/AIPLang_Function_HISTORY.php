@@ -9,12 +9,24 @@ class AIPLang_Function_HISTORY extends AIPLang_Function {
 	}
 	
 	public static function parse($line, $statement) {
-		if(substr($line, 0, 1) === '!') {
-			$id = (int) substr($line, 1);
-			
-			return \AIP\lib\Input::history_id($id);
-		}
+		\AIP\lib\Evaluer::make_internal_from(
+			\AIP\lib\Evaluer::SOURCE_OUTPUT,
+			'History'
+		);
 		
+		return substr($line, 0, 1) === '!' ? self::parse_bang($line) : self::parse_history($line);
+	}
+	
+	public static function parse_bang($line) {
+		$id = (int) substr($line, 1);
+		
+		try { return \AIP\lib\Input::history_id($id); }
+		catch(\AIP\excptns\lib\input\AIPInput_InvalidHistoryIDException $e) {
+			return 'echo \'' . addslashes($e->getMessage()) . '\'';
+		}
+	}
+	
+	public static function parse_history($line) {
 		$line = explode(' ', $line, 2);
 		
 		if(!isset($line[1])) $line[1] = '';
@@ -35,11 +47,6 @@ class AIPLang_Function_HISTORY extends AIPLang_Function {
 	
 	public function history() {
 		extract($this->args);
-		
-		\AIP\lib\Evaluer::make_internal_from(
-			\AIP\lib\Evaluer::SOURCE_OUTPUT,
-			'History'
-		);
 		
 		$history = \AIP\lib\Input::history($length, $start);
 		$history = array_reverse($history, true);
