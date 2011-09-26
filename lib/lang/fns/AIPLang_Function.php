@@ -46,7 +46,7 @@ abstract class AIPLang_Function extends \AIP\lib\lang\AIPLang_Construct {
 		$current = $start;
 		$name = '';
 		while(false !== ($c = substr($line, $current, 1))) {
-			if(!preg_match('#([a-zA-Z_])#iU', $c)) break;
+			if(!preg_match('#([a-zA-Z_\$])#iU', $c)) break;
 			
 			$name .= $c;
 			$current++;
@@ -79,6 +79,30 @@ abstract class AIPLang_Function extends \AIP\lib\lang\AIPLang_Construct {
 			throw new \AIP\excptns\lib\lang\fns\AIPLang_Function_NotValidSetterException("Given prefix isn't valid setter.");
 			
 		return $value;
+	}
+	
+	protected static function extract_name_function_arguments(&$line, $prefix) {
+		$name = self::extract_name($line, $prefix);
+		try {
+			$function = self::extract_function($line, $name);
+			$arguments = self::extract_args($function);
+		}
+		catch(\AIP\excptns\lib\lang\fns\AIPLang_Function_NotValidFunctionException $e) {
+			$function = false;
+			$arguments = false;
+		}
+			
+		if($function === false) {
+			try {
+				$arguments = self::extract_setter_value($line, $name);
+				$line = $name;
+			}
+			catch(\AIP\excptns\lib\lang\fns\AIPLang_Function_NotValidSetterException $e) {
+				$arguments = false;
+			}
+		}
+		
+		return compact('name', 'function', 'arguments');
 	}
 	
 	protected static function _calculate_start($line, $prefix) {

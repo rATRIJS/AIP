@@ -1,35 +1,29 @@
 <?php
 namespace AIP\lib\lang\fns;
 
-use \AIP\lib as L;
-
-class AIPLang_Function_THIS extends AIPLang_Function {
+class AIPLang_Function_SELF extends AIPLang_Function {
 	protected $thing;
 	protected $args;
 	
 	public static function parsable($line, $statement) {
-		return false !== strpos($line, '$this->');
+		return false !== strpos($line, 'self::');
 	}
 	
 	public static function parse($line, $statement) {
 		$current_reflection = self::get_current_reflection();
-		$current_instance = self::get_current_instance();
 		
 		if(!($current_reflection instanceof \ReflectionClass or $current_reflection instanceof \ReflectionMethod))
-			return self::error_before_eval('Cannot use $this in current scope.', 'You need to be inside class or method to use $this.');
+			return self::error_before_eval('Cannot use self in current scope.', 'You need to be inside class or method to use self.');
 		
-		if(!is_object($current_instance))
-			return self::error_before_eval('Cannot use $this in current scope.', 'You need to be inside object to use $this.');
+		extract(self::extract_name_function_arguments($line, 'self::'));
 		
-		extract(self::extract_name_function_arguments($line, '$this->'));
-		
-		$fake_name = substr($name, 7);
+		$fake_name = substr($name, 6);
 		if($function !== false) $fake_name = "{$fake_name}()";
 			
 		if(!empty($arguments))
 			$arguments = ", {$arguments}";
 		
-		$real = '\AIP\lib\lang\fns\AIPLang_Function_THIS::execute(\'' . $fake_name . '\'' . $arguments . ')';
+		$real = '\AIP\lib\lang\fns\AIPLang_Function_SELF::execute(\'' . $fake_name . '\'' . $arguments . ')';
 		
 		return $function === false ? str_replace($name, $real, $line) : str_replace($function, $real, $line);
 	}
@@ -39,65 +33,66 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 		array_shift($args);
 		
 		$c = new self($thing, $args);
-		return $c->this();
+		return $c->self();
 	}
 	
 	public function __construct($thing, $args) {
-		L\Evaluer::init_storage('instances', array());
-		L\Evaluer::init_storage('reflections', array());
+		\AIP\lib\Evaluer::init_storage('reflections', array());
 		
 		$this->thing = $thing;
 		$this->args = $args;
 	}
 	
-	public function this() {
+	public function self() {
 		$reflection = self::get_current_reflection();
-		$instance = self::get_current_instance();
+		
+		if($reflection instanceof \ReflectionMethod)
+			$reflection = $reflection->getDeclaringClass();
 		
 		if(substr($this->thing, -2) === '()')
-			return $this->_this_method($reflection, $instance);
+			return $this->_self_method($reflection);
 		else
-			return $this->_this_property($reflection, $instance);
+			return $this->_self_property($reflection);
 	}
 	
-	protected function _this_method(\ReflectionClass $reflection, $instance) {
+	protected function _self_method(\ReflectionClass $reflection) {
 		$method = substr($this->thing, 0, -2);
 		$class_name = $reflection->getName();
 		
 		if(!$reflection->hasMethod($method))
 			return self::error_in_eval('Invalid method name', "Method {$class_name}:{$method}() doesn't exist.");
-		
+			
 		$method = $reflection->getMethod($method);
 		$method_name = $method->getName();
 		$accessible = $method->isPublic();
 		
-		if($method->isStatic())
-			return self::error_in_eval('Invalid method', "Method {$class_name}:{$method_name}() is static.");
+		if(!$method->isStatic())
+			return self::error_in_eval('Invalid method', "Method {$class_name}:{$method_name}() isn't static.");
 		
 		$method->setAccessible(true);
-		$return = $method->invokeArgs($instance, $this->args);
+		$return = $method->invokeArgs(null, $this->args);
 		$method->setAccessible($accessible);
 		
 		return $return;
 	}
 	
-	protected function _this_property(\ReflectionClass $reflection, $instance) {
-		$property = $this->thing;
+	protected function _self_property(\ReflectionClass $reflection) {
+		$property = substr($this->thing, 1);
 		$class_name = $reflection->getName();
 		
 		if(!$reflection->hasProperty($property))
-			return self::error_in_eval('Invalid property name', "Property {$class_name}:\${$method}() doesn't exist.");
+			return self::error_in_eval('Invalid property name', "Property {$class_name}:\${$property} doesn't exist.");
 		
 		$property = $reflection->getProperty($property);
 		$property_name = $property->getName();
 		$accessible = $property->isPublic();
 		
-		if($property->isStatic())
-			return self::error_in_eval('Invalid property.', "Property {$class_name}:\${$property_name} is static.");
+		if(!$property->isStatic())
+			return self::error_in_eval('Invalid property.', "Property {$class_name}:\${$property_name} isn't static.");
 		
 		$property->setAccessible(true);
-		if(isset($this->args[0])) $property->setValue($instance, $this->args[0]);
-		$return = $property->getValue($instance);
+		if(isset($this->args[0])) $property->setValue($this->args[0]);
+		$return = $property->getValue();
 		$property->setAccessible($accessible);
 		
 		return $return;

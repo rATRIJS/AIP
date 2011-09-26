@@ -141,6 +141,7 @@ class Config {
 				'\AIP\lib\lang\fns\AIPLang_Function_LS',
 				'\AIP\lib\lang\fns\AIPLang_Function_SHOW_SOURCE',
 				'\AIP\lib\lang\fns\AIPLang_Function_THIS',
+				'\AIP\lib\lang\fns\AIPLang_Function_SELF',
 				'\AIP\lib\lang\fns\AIPLang_Function_AUTO_RETURNER'
 			)
 		);
