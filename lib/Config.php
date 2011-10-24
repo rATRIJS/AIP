@@ -14,6 +14,7 @@ class Config {
 	const OPTION_VERBOSITY = 'verbosity';
 	const OPTION_INPUT_READERS = 'input_readers';
 	const OPTION_HISTORY_SIZE = 'history_size';
+	const OPTION_COMMUNICATORS = 'communicators';
 	
 	protected static $i;
 	
@@ -79,6 +80,19 @@ class Config {
 		$this->_init_verbosity();
 		$this->_init_input_readers();
 		$this->_init_history_size();
+		$this->_init_communicators();
+	}
+	
+	protected function _init_communicators() {
+		$this->_defaultize_array_option(
+			self::OPTION_COMMUNICATORS,
+			self::MODE_MERGE,
+			'communicators',
+			array(
+				'\\AIP\\lib\\clnt\\cmnctr\\ClientServerCommunicator',
+				'\\AIP\\lib\\clnt\\cmnctr\\SimpleREPLCommunicator'
+			)
+		);
 	}
 	
 	protected function _init_history_size() {
@@ -96,8 +110,8 @@ class Config {
 			self::MODE_MERGE,
 			'readers',
 			array(
-				'\\AIP\\lib\\rdrs\\Readline',
-				'\\AIP\\lib\\rdrs\\SimpleSTDIN'
+				'\\AIP\\lib\\clnt\\rdrs\\Readline',
+				'\\AIP\\lib\\clnt\\rdrs\\SimpleSTDIN'
 			)
 		);
 	}
@@ -136,13 +150,13 @@ class Config {
 			self::MODE_MERGE,
 			'constructs',
 			array(
-				'\AIP\lib\lang\fns\AIPLang_Function_HISTORY',
-				'\AIP\lib\lang\fns\AIPLang_Function_CD',
-				'\AIP\lib\lang\fns\AIPLang_Function_LS',
-				'\AIP\lib\lang\fns\AIPLang_Function_SHOW_SOURCE',
-				'\AIP\lib\lang\fns\AIPLang_Function_THIS',
-				'\AIP\lib\lang\fns\AIPLang_Function_SELF',
-				'\AIP\lib\lang\fns\AIPLang_Function_AUTO_RETURNER'
+				// '\AIP\lib\srvr\lang\fns\AIPLang_Function_HISTORY',
+				// 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_CD',
+				// 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_LS',
+				// 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_SHOW_SOURCE',
+				// 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_THIS',
+				// 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_SELF',
+				'\AIP\lib\srvr\lang\fns\AIPLang_Function_AUTO_RETURNER'
 			)
 		);
 	}
