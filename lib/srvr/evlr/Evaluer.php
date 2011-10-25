@@ -17,7 +17,7 @@ class Evaluer {
 	protected static $last_was_unfinished = false;
 	
 	public static function execute(P\Statement $statement) {
-		$result = Result::confirmed(false);
+		$result = new Result;
 		
 		if($statement->in_block()) {
 			$result->message = 'Not yet finished';
@@ -30,13 +30,14 @@ class Evaluer {
 		
 		$result->php = $statement->to_php();
 		
+		\AIP\lib\srvr\History::i()->add($statement->to_aip());
 		if(self::$last_was_unfinished) {
 			self::$last_was_unfinished = false;
 			
-			$result->confirmed = $result->php;
+			\AIP\lib\srvr\History::i()->confirm($result->php);
 		}
 		else {
-			$result->confirmed = true;
+			\AIP\lib\srvr\History::i()->confirm();
 		}
 		
 		ob_start();

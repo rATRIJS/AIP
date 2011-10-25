@@ -24,13 +24,7 @@ class REPL {
 		if(!isset($line)) $line = Input::read(cmnctr\Communicator::i()->get_path());
 		
 		cmnctr\Communicator::i()->send($line);
-		$result = cmnctr\Communicator::i()->retrieve();
-		
-		if(false !== $result->confirmed) {
-			if(true === $result->confirmed) Input::confirm();
-			else Input::confirm($result->confirmed);
-		}
-		Output::write($result);
+		Output::write(cmnctr\Communicator::i()->retrieve());
 		
 		return cmnctr\Communicator::i()->is_interrupted();
 	}

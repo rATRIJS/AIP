@@ -11,8 +11,7 @@ class Readline extends Reader {
 	public function __construct() {}
 	
 	public function read($path) {
-		if(\AIP\lib\clnt\Input::i()->is_history_confirmed())
-			$this->_historize(array_pop(\AIP\lib\clnt\Input::history()));
+		$this->_historize(\AIP\lib\clnt\cmnctr\Communicator::i()->get_last_history());
 		
 		$line = readline($this->_get_input_question($path));
 		

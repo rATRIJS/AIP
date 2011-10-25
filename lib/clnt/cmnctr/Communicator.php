@@ -50,6 +50,10 @@ class Communicator {
 		return $this->_communicator->get_path();
 	}
 	
+	public function get_last_history() {
+		return $this->_communicator->get_last_history();
+	}
+	
 	protected function _setup_active_communicator() {
 		$available_communicators = L\Config::get(L\Config::OPTION_COMMUNICATORS);
 		

@@ -150,7 +150,7 @@ class Config {
 			self::MODE_MERGE,
 			'constructs',
 			array(
-				//'\AIP\lib\srvr\lang\fns\AIPLang_Function_HISTORY',
+				'\AIP\lib\srvr\lang\fns\AIPLang_Function_HISTORY',
 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_CD',
 				//'\AIP\lib\srvr\lang\fns\AIPLang_Function_LS',
 				//'\AIP\lib\srvr\lang\fns\AIPLang_Function_SHOW_SOURCE',

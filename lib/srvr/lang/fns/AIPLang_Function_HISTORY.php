@@ -1,16 +1,18 @@
 <?php
 namespace AIP\lib\srvr\lang\fns;
 
+use \AIP\lib\srvr\evlr\Evaluer;
+
 class AIPLang_Function_HISTORY extends AIPLang_Function {
-	protected $args;
+	protected $_args;
 	
 	public static function parsable($line, $statement) {
 		return $line === 'history' or substr($line, 0, 8) === 'history ' or preg_match('#^!\d+$#', $line);
 	}
 	
 	public static function parse($line, $statement) {
-		\AIP\lib\Evaluer::make_internal_from(
-			\AIP\lib\Evaluer::SOURCE_OUTPUT,
+		Evaluer::make_internal_from(
+			Evaluer::SOURCE_OUTPUT,
 			'History'
 		);
 		
@@ -20,8 +22,8 @@ class AIPLang_Function_HISTORY extends AIPLang_Function {
 	public static function parse_bang($line) {
 		$id = (int) substr($line, 1);
 		
-		try { return \AIP\lib\Input::history_id($id); }
-		catch(\AIP\excptns\lib\input\AIPInput_InvalidHistoryIDException $e) {
+		try { return \AIP\lib\srvr\History::i()->get_by_id($id); }
+		catch(\AIP\excptns\lib\srvr\hstry\InvalidIDException $e) {
 			return 'echo \'' . addslashes($e->getMessage()) . '\'';
 		}
 	}
@@ -31,7 +33,7 @@ class AIPLang_Function_HISTORY extends AIPLang_Function {
 		
 		if(!isset($line[1])) $line[1] = '';
 		
-		return '\\AIP\\lib\\lang\\fns\\AIPLang_Function_HISTORY::execute(\'' . $line[1] . '\')';
+		return self::_get_namespaced_self() . '::execute(\'' . $line[1] . '\')';
 	}
 	
 	public static function execute($args = '') {
@@ -42,13 +44,13 @@ class AIPLang_Function_HISTORY extends AIPLang_Function {
 	}
 	
 	public function __construct($args) {
-		$this->args = $this->_parse_args($args);
+		$this->_args = $this->_parse_args($args);
 	}
 	
 	public function history() {
-		extract($this->args);
+		extract($this->_args);
 		
-		$history = \AIP\lib\Input::history($length, $start);
+		$history = \AIP\lib\srvr\History::i()->get($length, $start);
 		$history = array_reverse($history, true);
 		
 		$data = array();

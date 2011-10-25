@@ -1,6 +1,7 @@
 <?php
 namespace AIP\lib\clnt\cmnctr;
 
+use \AIP\lib\srvr as S;
 use \AIP\lib\srvr\prsr as P;
 use \AIP\lib\srvr\evlr as Ev;
 
@@ -29,5 +30,9 @@ class SimpleREPLCommunicator implements ICommunicator {
 	
 	public function get_result() {
 		return $this->_result;
+	}
+	
+	public function get_last_history() {
+		return array_pop(S\History::i()->get());
 	}
 }

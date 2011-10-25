@@ -10,7 +10,6 @@ class Result {
 	public $message;
 	public $php;
 	public $internal;
-	public $confirmed;
 	
 	public static function __callStatic($name, $args) {
 		if(property_exists(__CLASS__, $name) and isset($args[0]))

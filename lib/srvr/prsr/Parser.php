@@ -17,6 +17,8 @@ class Parser {
 	}
 	
 	public function parse($line) {
+		$this->statement->set_aip($line);
+		
 		$line = Helper::sanitize($line);
 		
 		$starts_block = Helper::starts_block($line);

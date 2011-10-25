@@ -21,4 +21,8 @@ class ClientServerCommunicator implements ICommunicator {
 	public function get_path() {
 		//
 	}
+	
+	public function get_last_history() {
+		//
+	}
 }
