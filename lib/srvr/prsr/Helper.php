@@ -17,6 +17,20 @@ class Helper {
 		return $line;
 	}
 	
+	public static function quotenize($target) {
+		if(!in_array(substr($target, 0, 1), array('$', '\'', '"')) and substr($target, -1) !== ')')
+			$target = "'{$target}'";
+			
+		return $target;
+	}
+	
+	public static function var_quotenize($target) {
+		if(!in_array(substr($target, 0, 1), array('$', '\'', '"')))
+			$target = "'{$target}'";
+			
+		return $target;
+	}
+	
 	public static function interrupts($line) {
 		$valid_interrupts = array(
 			'die;',

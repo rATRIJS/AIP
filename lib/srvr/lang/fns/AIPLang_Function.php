@@ -2,20 +2,6 @@
 namespace AIP\lib\srvr\lang\fns;
 
 abstract class AIPLang_Function extends \AIP\lib\srvr\lang\AIPLang_Construct {
-	protected static function quotenize($target) {
-		if(!in_array(substr($target, 0, 1), array('$', '\'', '"')) and substr($target, -1) !== ')')
-			$target = "'{$target}'";
-			
-		return $target;
-	}
-	
-	protected static function var_quotenize($target) {
-		if(!in_array(substr($target, 0, 1), array('$', '\'', '"')))
-			$target = "'{$target}'";
-			
-		return $target;
-	}
-	
 	protected static function extract_function($line, $prefix) {
 		$start = self::_calculate_start($line, $prefix);
 		if(substr($line, $start, 1) !== '(')

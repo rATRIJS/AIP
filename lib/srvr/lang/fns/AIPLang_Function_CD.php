@@ -1,8 +1,11 @@
 <?php
 namespace AIP\lib\srvr\lang\fns;
 
+use \AIP\lib\srvr\prsr as P;
+use \AIP\lib\srvr\evlr as Ev;
+
 class AIPLang_Function_CD extends AIPLang_Function {
-	protected $thing;
+	protected $_thing;
 	
 	public static function parsable($line, $statement) {
 		return substr($line, 0, 2) == 'cd' and (strlen($line) === 2 or substr($line, 0, 3) === 'cd ');
@@ -29,9 +32,9 @@ class AIPLang_Function_CD extends AIPLang_Function {
 			}
 		}
 		
-		$line[1] = self::quotenize($line[1]);
+		$line[1] = P\Helper::quotenize($line[1]);
 			
-		return '\AIP\lib\lang\fns\AIPLang_Function_CD::execute(' . $line[1] . ')';
+		return self::_get_namespaced_self() . '::execute(' . $line[1] . ')';
 	}
 	
 	public static function execute($thing) {
@@ -42,15 +45,12 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	}
 	
 	public function __construct($thing) {
-		\AIP\lib\Evaluer::init_storage('reflections', array());
-		\AIP\lib\Evaluer::init_storage('instances', array());
-		
-		$this->thing = $thing;
+		$this->_thing = $thing;
 	}
 	
 	public function cd() {
-		if($this->thing === '.') return $this->_cd_self();
-		elseif($this->thing === '..') return $this->_cd_parent();
+		if($this->_thing === '.') return $this->_cd_self();
+		elseif($this->_thing === '..') return $this->_cd_parent();
 		
 		return $this->_cd_thing();
 	}
@@ -60,36 +60,34 @@ class AIPLang_Function_CD extends AIPLang_Function {
 	}
 	
 	protected function _cd_parent() {
-		unset(\AIP\lib\Evaluer::$storage['reflections'][\AIP\lib\Evaluer::pathenize()]);
-		unset(\AIP\lib\Evaluer::$storage['instances'][\AIP\lib\Evaluer::pathenize()]);
-		\AIP\lib\Evaluer::sandbox_vars(array(), false);
+		Ev\Evaluer::reflection(null);
+		Ev\Evaluer::instance(null);
+		Ev\Evaluer::sandbox_vars(array(), false);
 		
-		array_pop(\AIP\lib\Evaluer::$path);
+		array_pop(Ev\Evaluer::$path);
 		
 		return true;
 	}
 	
 	protected function _cd_thing() {
-		$current_path = \AIP\lib\Evaluer::pathenize();
-		$current_reflection = isset(\AIP\lib\Evaluer::$storage['reflections'][$current_path]) ?
-			\AIP\lib\Evaluer::$storage['reflections'][$current_path] : false;
+		$current_reflection = Ev\Evaluer::reflection();
 		
-		if(is_array($this->thing)) {
-			if($this->thing[0] === '$this') {
+		if(is_array($this->_thing)) {
+			if($this->_thing[0] === '$this') {
 				if(!$current_reflection instanceof \ReflectionClass) die('CD::73'); // TODO : throw Exception
 				
-				$this->thing[0] = $current_reflection->name;
+				$this->_thing[0] = $current_reflection->name;
 			}
 		}
 		
-		$r = new \AIP\lib\Reflectionizer($this->thing);
+		$r = new \AIP\lib\srvr\Reflectionizer($this->_thing);
 		
-		\AIP\lib\Evaluer::$path[] = $r->locationize();
-		\AIP\lib\Evaluer::$storage['reflections'][\AIP\lib\Evaluer::pathenize()] = $r->reflectionize();
-		\AIP\lib\Evaluer::sandbox_vars(array(), false);
+		Ev\Evaluer::$path[] = $r->locationize();
+		Ev\Evaluer::reflection($r->reflectionize());
+		Ev\Evaluer::sandbox_vars(array(), false);
 		
-		if(is_object($this->thing))
-			\AIP\lib\Evaluer::$storage['instances'][\AIP\lib\Evaluer::pathenize()] = $this->thing;
+		if(is_object($this->_thing))
+			Ev\Evaluer::instance($this->_thing);
 		
 		return true;
 	}

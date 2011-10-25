@@ -9,7 +9,8 @@ class Evaluer {
 	const SOURCE_OUTPUT = 'output';
 	
 	public static $path = array();
-	public static $storage = array();
+	public static $reflections = array();
+	public static $instances = array();
 	
 	protected static $sandbox_vars = array();
 	protected static $internalize_result = false;
@@ -70,13 +71,30 @@ class Evaluer {
 		return self::$sandbox_vars[$path];
 	}
 	
-	public static function init_storage($key, $value) {
-		if(!isset(self::$storage[$key]))
-			self::$storage[$key] = $value;
-	}
-	
 	public static function pathenize() {
 		return '/' . implode('/', self::$path);
+	}
+	
+	public static function reflection($reflection = false) {
+		$current_path = self::pathenize();
+		
+		if($reflection !== false) {
+			if(null === $reflection) unset(self::$reflections[$current_path]);
+			else self::$reflections[$current_path] = $reflection;
+		}
+		
+		return isset(self::$reflections[$current_path]) ? self::$reflections[$current_path] : false;
+	}
+	
+	public static function instance($instance = false) {
+		$current_path = self::pathenize();
+		
+		if($instance !== false) {
+			if(null === $instance) unset(self::$instances[$current_path]);
+			else self::$instances[$current_path] = $instance;
+		}
+		
+		return isset(self::$instances[$current_path]) ? self::$instances[$current_path] : false;
 	}
 	
 	protected static function sandboxed_eval($__aip_php) {
