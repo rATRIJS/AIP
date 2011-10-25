@@ -1,21 +1,21 @@
 <?php
-namespace AIP\lib\lang\fns\LS;
+namespace AIP\lib\srvr\lang\fns\LS;
 
 class _LS_CLASS {
-	protected $reflection;
-	protected $args;
+	protected $_reflection;
+	protected $_args;
 	
 	public function init(\ReflectionClass $reflection, $args) {
 		return new self($reflection, $args);
 	}
 	
 	public function __construct(\ReflectionClass $reflection, $args) {
-		$this->reflection = $reflection;
-		$this->args = $this->_parse_args($args);
+		$this->_reflection = $reflection;
+		$this->_args = $this->_parse_args($args);
 	}
 	
 	public function render() {
-		extract($this->args);
+		extract($this->_args);
 		
 		$output = '';
 		
@@ -29,7 +29,7 @@ class _LS_CLASS {
 	protected function _prepare_constants(&$output) {
 		$output .= "Constants: \n";
 		
-		$constants = $this->reflection->getConstants();
+		$constants = $this->_reflection->getConstants();
 		
 		foreach($constants as $constant_name => $constant_value) {
 			if(is_string($constant_value))
@@ -40,7 +40,7 @@ class _LS_CLASS {
 	}
 	
 	protected function _prepare_properties(&$output) {
-		extract($this->args);
+		extract($this->_args);
 		
 		$output .= "Properties:\n";
 		
@@ -56,7 +56,7 @@ class _LS_CLASS {
 			if(!in_array($k, $types))
 				$filter -= $type_map[$k];
 			
-		$properties = $this->reflection->getProperties($filter);
+		$properties = $this->_reflection->getProperties($filter);
 
 		foreach($properties as $property) {
 			$output .= "\t- ";
@@ -72,7 +72,7 @@ class _LS_CLASS {
 	}
 	
 	protected function _prepare_methods(&$output) {
-		extract($this->args);
+		extract($this->_args);
 		
 		$output .= "Methods:\n";
 		
@@ -90,12 +90,12 @@ class _LS_CLASS {
 			if(!in_array($k, $types))
 				$filter -= $type_map[$k];
 				
-		$methods = $this->reflection->getMethods($filter);
+		$methods = $this->_reflection->getMethods($filter);
 		
 		foreach($methods as $method) {
 			$declared_class = $method->getDeclaringClass();
 			
-			$is_inherited = $this->reflection->getName() !== $declared_class->getName();
+			$is_inherited = $this->_reflection->getName() !== $declared_class->getName();
 			if($is_inherited and !in_array('inherited', $types)) continue;
 			
 			$output .= "\t- ";

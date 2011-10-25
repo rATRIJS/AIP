@@ -1,23 +1,23 @@
 <?php
-namespace AIP\lib\lang\fns\LS;
+namespace AIP\lib\srvr\lang\fns\LS;
 
 class _LS_METHOD {
-	protected $reflection;
-	protected $args;
+	protected $_reflection;
+	protected $_args;
 	
 	public function init(\ReflectionMethod $reflection, $args) {
 		return new self($reflection, $args);
 	}
 	
 	public function __construct(\ReflectionMethod $reflection, $args) {
-		$this->reflection = $reflection;
-		$this->args = $this->_parse_args($args);
+		$this->_reflection = $reflection;
+		$this->_args = $this->_parse_args($args);
 	}
 	
 	public function render() {
-		extract($this->args);
+		extract($this->_args);
 		
-		$parameters = $this->reflection->getParameters();
+		$parameters = $this->_reflection->getParameters();
 		
 		$output = "Arguments:\n";
 		foreach($parameters as $parameter) {

@@ -1,5 +1,5 @@
 <?php
-namespace AIP\lib\lang\fns\LS;
+namespace AIP\lib\srvr\lang\fns\LS;
 
 class _LS_NO_REFLECTION {
 	public function init() {
@@ -9,6 +9,6 @@ class _LS_NO_REFLECTION {
 	public function __construct() {}
 	
 	public function render() {
-		print_r(\AIP\lib\Evaluer::sandbox_vars());
+		print_r(\AIP\lib\srvr\evlr\Evaluer::sandbox_vars());
 	}
 }
