@@ -1,6 +1,8 @@
 <?php
 namespace AIP\lib\srvr\lang\fns;
 
+use \AIP\lib\srvr\evlr as Ev;
+
 class AIPLang_Function_SHOW_SOURCE extends AIPLang_Function {
 	protected $target;
 	
@@ -12,9 +14,9 @@ class AIPLang_Function_SHOW_SOURCE extends AIPLang_Function {
 		$line = explode(' ', $line);
 		
 		if(!isset($line[1])) $line[1] = "'.'";
-		else $line[1] = \AIP\lib\Reflectionizer::parse_statement($line[1]);
+		else $line[1] = \AIP\lib\srvr\Reflectionizer::parse_statement($line[1]);
 			
-		return '\AIP\lib\lang\fns\AIPLang_Function_SHOW_SOURCE::execute(' . $line[1] . ')';
+		return self::_get_namespaced_self() . '::execute(' . $line[1] . ')';
 	}
 	
 	public static function execute($target) {
@@ -25,14 +27,12 @@ class AIPLang_Function_SHOW_SOURCE extends AIPLang_Function {
 	}
 	
 	public function __construct($target) {
-		\AIP\lib\Evaluer::init_storage('reflections', array());
-		
 		$this->target = $target;
 	}
 	
 	public function show_source() {
 		$reflection = false;
-		$current_reflection = self::get_current_reflection();
+		$current_reflection = Ev\Evaluer::reflection();
 		
 		if($this->target === '.') $reflection = $current_reflection;
 		else $reflection = self::reflection_target_to_reflection($this->target);
@@ -62,8 +62,8 @@ class AIPLang_Function_SHOW_SOURCE extends AIPLang_Function {
 		
 		$location = $reflection->getFileName() . ':' . $reflection->getStartLine();
 		
-		\AIP\lib\Evaluer::make_internal_from(
-			\AIP\lib\Evaluer::SOURCE_OUTPUT,
+		Ev\Evaluer::make_internal_from(
+			Ev\Evaluer::SOURCE_OUTPUT,
 			sprintf("Source Code for %s '%s' (%s)", $type, $name, $location)
 		);
 	}

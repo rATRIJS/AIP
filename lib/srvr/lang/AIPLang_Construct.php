@@ -1,7 +1,7 @@
 <?php
 namespace AIP\lib\srvr\lang;
 
-use \AIP\lib as L;
+use \AIP\lib\srvr as S;
 
 abstract class AIPLang_Construct {
 	abstract public static function parsable($line, $statement);
@@ -11,27 +11,9 @@ abstract class AIPLang_Construct {
 		return '\\' . get_called_class();
 	}
 	
-	protected static function get_current_reflection() {
-		$current_path = static::get_current_path();
-		
-		return (isset(L\Evaluer::$storage['reflections']) and isset(L\Evaluer::$storage['reflections'][$current_path])) ?
-			L\Evaluer::$storage['reflections'][$current_path] : false;
-	}
-	
-	protected static function get_current_instance() {
-		$current_path = static::get_current_path();
-		
-		return (isset(L\Evaluer::$storage['instances']) and isset(L\Evaluer::$storage['instances'][$current_path])) ?
-			L\Evaluer::$storage['instances'][$current_path] : false;
-	}
-	
-	protected static function get_current_path() {
-		return L\Evaluer::pathenize();
-	}
-	
 	protected static function error_before_eval($title, $message) {
-		L\Evaluer::make_internal_from(
-			L\Evaluer::SOURCE_OUTPUT,
+		S\evlr\Evaluer::make_internal_from(
+			S\evlr\Evaluer::SOURCE_OUTPUT,
 			$title
 		);
 		
@@ -39,18 +21,18 @@ abstract class AIPLang_Construct {
 	}
 	
 	protected static function error_in_eval($title, $message) {
-		L\Evaluer::make_internal_from(
-			L\Evaluer::SOURCE_OUTPUT,
+		S\evlr\Evaluer::make_internal_from(
+			S\evlr\Evaluer::SOURCE_OUTPUT,
 			$title
 		);
 		
 		echo $message;
 		
-		return L\hlprs\NotReturnable::i();
+		return \AIP\lib\hlprs\NotReturnable::i();
 	}
 	
 	protected static function reflection_target_to_reflection($target) {
-		$current_reflection = static::get_current_reflection();
+		$current_reflection = S\evlr\Evaluer::reflection();
 		
 		if(is_array($target)) {
 			if($target[0] === '$this') {
@@ -64,31 +46,31 @@ abstract class AIPLang_Construct {
 			elseif(substr($target[0], 0, 1) === '$') {
 				$var_name = substr($target[0], 1);
 				
-				$sandbox_vars = L\Evaluer::sandbox_vars();
+				$sandbox_vars = S\evlr\Evaluer::sandbox_vars();
 				if(!isset($sandbox_vars[$var_name])) die('CONSTRUCT::55');
 				
 				$var = $sandbox_vars[$var_name];
 				if(!is_object($var)) die('CONSTRUCT::58');
 				
-				$reflection = new L\Reflectionizer(array($var, $target[1]));
+				$reflection = new S\Reflectionizer(array($var, $target[1]));
 				return $reflection->reflectionize();
 			}
 			else {
-				$reflection = new L\Reflectionizer($target);
+				$reflection = new S\Reflectionizer($target);
 				return $reflection->reflectionize();
 			}
 		}
 		elseif(substr($target, 0, 1) === '$') {
 			$var_name = substr($target, 1);
 			
-			$sandbox_vars = L\Evaluer::sandbox_vars();
+			$sandbox_vars = S\evlr\Evaluer::sandbox_vars();
 			if(!isset($sandbox_vars[$var_name])) die('CONSTRUCT::67');
 			
-			$reflection = new L\Reflectionizer($sandbox_vars[$var_name]);
+			$reflection = new S\Reflectionizer($sandbox_vars[$var_name]);
 			return $reflection->reflectionize();
 		}
 		else {
-			$reflection = new L\Reflectionizer($target);
+			$reflection = new S\Reflectionizer($target);
 			return $reflection->reflectionize();
 		}
 	}
