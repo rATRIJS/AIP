@@ -1,19 +1,20 @@
 <?php
 namespace AIP\lib\srvr\lang\fns;
 
-use \AIP\lib as L;
+use \AIP\lib\srvr\evlr as Ev;
+use \AIP\lib\srvr\prsr as P;
 
 class AIPLang_Function_THIS extends AIPLang_Function {
-	protected $thing;
-	protected $args;
+	protected $_thing;
+	protected $_args;
 	
 	public static function parsable($line, $statement) {
 		return false !== strpos($line, '$this->');
 	}
 	
 	public static function parse($line, $statement) {
-		$current_reflection = self::get_current_reflection();
-		$current_instance = self::get_current_instance();
+		$current_reflection = Ev\Evaluer::reflection();
+		$current_instance = Ev\Evaluer::instance();
 		
 		if(!($current_reflection instanceof \ReflectionClass or $current_reflection instanceof \ReflectionMethod))
 			return self::error_before_eval('Cannot use $this in current scope.', 'You need to be inside class or method to use $this.');
@@ -21,7 +22,7 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 		if(!is_object($current_instance))
 			return self::error_before_eval('Cannot use $this in current scope.', 'You need to be inside object to use $this.');
 		
-		extract(self::extract_name_function_arguments($line, '$this->'));
+		extract(P\Helper::extract_name_function_arguments($line, '$this->'));
 		
 		$fake_name = substr($name, 7);
 		if($function !== false) $fake_name = "{$fake_name}()";
@@ -29,7 +30,7 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 		if(!empty($arguments))
 			$arguments = ", {$arguments}";
 		
-		$real = '\AIP\lib\lang\fns\AIPLang_Function_THIS::execute(\'' . $fake_name . '\'' . $arguments . ')';
+		$real = self::_get_namespaced_self() . '::execute(\'' . $fake_name . '\'' . $arguments . ')';
 		
 		return $function === false ? str_replace($name, $real, $line) : str_replace($function, $real, $line);
 	}
@@ -43,25 +44,22 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 	}
 	
 	public function __construct($thing, $args) {
-		L\Evaluer::init_storage('instances', array());
-		L\Evaluer::init_storage('reflections', array());
-		
-		$this->thing = $thing;
-		$this->args = $args;
+		$this->_thing = $thing;
+		$this->_args = $args;
 	}
 	
 	public function this() {
-		$reflection = self::get_current_reflection();
-		$instance = self::get_current_instance();
+		$reflection = Ev\Evaluer::reflection();
+		$instance = Ev\Evaluer::instance();
 		
-		if(substr($this->thing, -2) === '()')
+		if(substr($this->_thing, -2) === '()')
 			return $this->_this_method($reflection, $instance);
 		else
 			return $this->_this_property($reflection, $instance);
 	}
 	
 	protected function _this_method(\ReflectionClass $reflection, $instance) {
-		$method = substr($this->thing, 0, -2);
+		$method = substr($this->_thing, 0, -2);
 		$class_name = $reflection->getName();
 		
 		if(!$reflection->hasMethod($method))
@@ -75,14 +73,14 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 			return self::error_in_eval('Invalid method', "Method {$class_name}:{$method_name}() is static.");
 		
 		$method->setAccessible(true);
-		$return = $method->invokeArgs($instance, $this->args);
+		$return = $method->invokeArgs($instance, $this->_args);
 		$method->setAccessible($accessible);
 		
 		return $return;
 	}
 	
 	protected function _this_property(\ReflectionClass $reflection, $instance) {
-		$property = $this->thing;
+		$property = $this->_thing;
 		$class_name = $reflection->getName();
 		
 		if(!$reflection->hasProperty($property))
@@ -96,7 +94,7 @@ class AIPLang_Function_THIS extends AIPLang_Function {
 			return self::error_in_eval('Invalid property.', "Property {$class_name}:\${$property_name} is static.");
 		
 		$property->setAccessible(true);
-		if(isset($this->args[0])) $property->setValue($instance, $this->args[0]);
+		if(isset($this->_args[0])) $property->setValue($instance, $this->_args[0]);
 		$return = $property->getValue($instance);
 		$property->setAccessible($accessible);
 		
