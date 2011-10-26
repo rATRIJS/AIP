@@ -155,7 +155,7 @@ class Config {
 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_LS',
 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_SHOW_SOURCE',
 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_THIS',
-				//'\AIP\lib\srvr\lang\fns\AIPLang_Function_SELF',
+				'\AIP\lib\srvr\lang\fns\AIPLang_Function_SELF',
 				'\AIP\lib\srvr\lang\fns\AIPLang_Function_AUTO_RETURNER'
 			)
 		);
