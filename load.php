@@ -8,6 +8,11 @@ require _AIP_LIB_PATH . '/Loader.php';
 lib\Loader::init();
 /* </INITIALIZE LOADER> */
 
+/* <RAW INIT INCLUDE> */
+if(false !== lib\Config::get(lib\Config::OPTION_RAW_INIT_INCLUDE))
+	include lib\Config::get(lib\Config::OPTION_RAW_INIT_INCLUDE);
+/* </RAW INIT INCLUDE> */
+
 /* <START REPL> */
 lib\clnt\REPL::i()->loop();
 /* </START REPL> */

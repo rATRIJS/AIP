@@ -10,7 +10,7 @@ class Config {
 	
 	const OPTION_AIP_LANG_CONSTRUCTS = 'aip_lang_constructs';
 	const OPTION_BEFORE_LOOP_EXEC = 'before_loop_exec';
-	const OPTION_BEFORE_REPL_INCLUDE = 'before_repl_include';
+	const OPTION_RAW_INIT_INCLUDE = 'raw_init_include';
 	const OPTION_VERBOSITY = 'verbosity';
 	const OPTION_INPUT_READERS = 'input_readers';
 	const OPTION_HISTORY_SIZE = 'history_size';
@@ -74,7 +74,7 @@ class Config {
 		if(!is_array($this->_config))
 			throw new E\AIPConfig_FileException('Configuration file must return an array.');
 		
-		$this->_init_before_repl_include();
+		$this->_init_raw_init_include();
 		$this->_init_before_loop_exec();
 		$this->_init_aip_lang_constructs();
 		$this->_init_verbosity();
@@ -125,8 +125,8 @@ class Config {
 		$this->_config[$k] = (int) $this->_config[$k];
 	}
 	
-	protected function _init_before_repl_include() {
-		$k = self::OPTION_BEFORE_REPL_INCLUDE;
+	protected function _init_raw_init_include() {
+		$k = self::OPTION_RAW_INIT_INCLUDE;
 		
 		if(empty($this->_config[$k]))
 			$this->_config[$k] = false;
