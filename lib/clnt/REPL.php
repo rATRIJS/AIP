@@ -13,7 +13,7 @@ class REPL {
 	protected function __construct() {}
 	
 	public function loop() {
-		//$this->run_before_loop_exec();
+		$this->run_before_loop_exec();
 		
 		$interrupt = false;
 		while(!$interrupt)
@@ -30,17 +30,17 @@ class REPL {
 	}
 	
 	protected function run_before_loop_exec() {
-		$exec = Config::get(Config::OPTION_BEFORE_LOOP_EXEC);
+		$exec = \AIP\lib\Config::get(\AIP\lib\Config::OPTION_BEFORE_LOOP_EXEC);
 		
 		ob_start();
 		foreach($exec as $line)
 			$this->tick($line);
 		$output = ob_get_clean();
 		
-		if(Config::get(Config::OPTION_VERBOSITY) > 0) {
-			Output::write(Result::message("Start of 'before_loop_exec'"));
+		if(\AIP\lib\Config::get(\AIP\lib\Config::OPTION_VERBOSITY) > 0) {
+			Output::write(\AIP\lib\srvr\evlr\Result::message("Start of 'before_loop_exec'"));
 			Output::raw_write($output);
-			Output::write(Result::message("End of 'before_loop_exec'"));
+			Output::write(\AIP\lib\srvr\evlr\Result::message("End of 'before_loop_exec'"));
 		}
 	}
 }
