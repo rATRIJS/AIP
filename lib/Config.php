@@ -15,6 +15,7 @@ class Config {
 	const OPTION_INPUT_READERS = 'input_readers';
 	const OPTION_HISTORY_SIZE = 'history_size';
 	const OPTION_COMMUNICATORS = 'communicators';
+	const OPTION_SERVER_ADDR = 'server_addr';
 	
 	protected static $i;
 	
@@ -81,6 +82,14 @@ class Config {
 		$this->_init_input_readers();
 		$this->_init_history_size();
 		$this->_init_communicators();
+		$this->_init_server_addr();
+	}
+	
+	protected function _init_server_addr() {
+		$k = self::OPTION_SERVER_ADDR;
+		
+		if(empty($this->_config[$k]))
+			$this->_config[$k] = '127.0.0.1:6666';
 	}
 	
 	protected function _init_communicators() {
