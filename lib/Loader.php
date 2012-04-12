@@ -3,7 +3,7 @@ namespace AIP\lib;
 
 class Loader {
 	public static function init() {
-		spl_autoload_register(array(self, 'load'));
+		spl_autoload_register(array('\\' . __CLASS__, 'load'));
 	}
 	
 	public static function load($class) {
